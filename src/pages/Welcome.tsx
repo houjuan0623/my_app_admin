@@ -16,7 +16,7 @@ const Welcome: React.FC = () => {
   const intl = useIntl();
 
   return (
-    <PageContainer>
+    <PageContainer ghost={true} breadcrumbRender={false}>
       <Card>
         <Alert
           message={intl.formatMessage({
