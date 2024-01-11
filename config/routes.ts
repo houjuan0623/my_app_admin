@@ -29,13 +29,22 @@
     name: 'admin',
     icon: 'crown',
     access: 'canAdmin',
-    component: './Admin',
+    // component: './Admin',
     routes: [
       {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        icon: 'smile',
-        component: './Welcome',
+        path: '/admin/user-management',
+        name: 'user-management',
+        component: './SysManagement/UserManagement',
+      },
+      {
+        path: '/admin/role-management',
+        name: 'role-management',
+        component: './Admin',
+      },
+      {
+        path: '/admin/permission-management',
+        name: 'permission-management',
+        component: './SysManagement/PermissionManagement',
       },
       {
         component: './404',
@@ -47,6 +56,12 @@
     icon: 'table',
     path: '/list',
     component: './TableList',
+  },
+  {
+    name: 'list.school-list',
+    icon: 'table',
+    path: '/listSchool',
+    component: './SchoolList',
   },
   {
     path: '/',

@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType } from '@ant-design/pro-components';
 import { ProTable, ModalForm, ProFormText } from '@ant-design/pro-components';
-import { Button, Form, message, Modal } from 'antd';
+import { Button, Form, message, Modal, Tag } from 'antd';
 import { useRef } from 'react';
 import request from 'umi-request';
+
+import type { roleItem } from '../definition';
+
 export const waitTimePromise = async (time: number = 100) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -17,22 +20,53 @@ export const waitTime = async (time: number = 100) => {
   await waitTimePromise(time);
 };
 
-type SchoolItem = {
-  name: string;
+type UserItem = {
   _id: string;
+  username: string;
+  name?: string;
+  roles: [];
+  createdAt: Date;
   __v?: number;
-  classIds?: string[];
 };
+
+type RoleEnum = Record<string, { text: string }>;
 
 export default () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm<{ name: string; company: string }>();
   const actionRef = useRef<ActionType>();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentSchool, setCurrentSchool] = useState<SchoolItem | null>(null);
+  const [currentSchool, setCurrentSchool] = useState<UserItem | null>(null);
+  // 记录格式化后适用于protable中多选的的数据
+  const [rolesEnum, setRolesEnum] = useState({});
+
+  // 向后端发起请求，请求所有的角色
+  useEffect(() => {
+    const loadRolesData = async () => {
+      try {
+        const response = await request('http://172.16.17.159:4000/api/v1/getRoles');
+        if (response.success && response.data) {
+          const newRolesEnum = response.data.reduce((acc: RoleEnum, role: roleItem) => {
+            acc[role._id] = { text: role.name };
+            return acc;
+          }, {});
+          setRolesEnum(newRolesEnum);
+        } else {
+          // 处理响应失败的情况
+          console.error('加载角色数据失败：', response.message);
+          message.error('加载角色数据失败');
+        }
+      } catch (error) {
+        // 捕获到请求错误
+        console.error('请求角色数据出错：', error);
+        message.error('请求角色数据出错，可刷新界面尝试重新加载');
+      }
+    };
+    loadRolesData();
+  }, []);
 
   // 显示模态框的函数
-  const showModal = (school: SchoolItem) => {
+  const showModal = (school: UserItem) => {
     setCurrentSchool(school);
     setIsModalVisible(true);
   };
@@ -48,7 +82,6 @@ export default () => {
   };
 
   const updateSchool = async () => {
-    console.log('121231213');
     return { _id: '121', name: '112312' };
   };
 
@@ -57,13 +90,20 @@ export default () => {
     onChange: onSelectChange,
   };
 
+  const valueEnum = {
+    all: { text: '全部' },
+    running: { text: '运行中' },
+    online: { text: '已上线' },
+    异常: { text: '异常' },
+  };
+
   return (
     <>
-      <ProTable<SchoolItem>
+      <ProTable<UserItem>
         columns={[
           {
-            title: '学校',
-            dataIndex: 'name',
+            title: '用户名',
+            dataIndex: 'username',
             copyable: true,
             ellipsis: true,
             formItemProps: {
@@ -75,28 +115,51 @@ export default () => {
               ],
             },
           },
-          // {
-          //   title: '创建时间',
-          //   key: 'showTime',
-          //   dataIndex: 'created_at',
-          //   valueType: 'date',
-          //   sorter: true,
-          //   hideInSearch: true,
-          // },
-          // {
-          //   title: '创建时间',
-          //   dataIndex: 'created_at',
-          //   valueType: 'dateRange',
-          //   hideInTable: true,
-          //   search: {
-          //     transform: (value) => {
-          //       return {
-          //         startTime: value[0],
-          //         endTime: value[1],
-          //       };
-          //     },
-          //   },
-          // },
+          {
+            title: '姓名',
+            dataIndex: 'name',
+            render: (_, record) => record.name || '暂未设置姓名',
+            copyable: true,
+            ellipsis: true,
+          },
+          {
+            title: '角色',
+            dataIndex: 'roles',
+            valueType: 'checkbox',
+            initialValue: ['all'],
+            render: (_, record) =>
+              record.roles && record.roles.length > 0
+                ? record.roles.map((role) => (
+                    <Tag color="blue" key={role}>
+                      {role}
+                    </Tag>
+                  ))
+                : '暂未配置角色',
+            valueEnum: rolesEnum,
+            hideInSearch: true,
+          },
+          {
+            title: '创建时间',
+            key: 'showTime',
+            dataIndex: 'createdAt',
+            valueType: 'date',
+            sorter: true,
+            hideInSearch: true,
+          },
+          {
+            title: '创建时间',
+            dataIndex: 'created_at',
+            valueType: 'dateRange',
+            hideInTable: true,
+            search: {
+              transform: (value) => {
+                return {
+                  startTime: value[0],
+                  endTime: value[1],
+                };
+              },
+            },
+          },
           {
             title: '操作',
             valueType: 'option',
@@ -130,8 +193,8 @@ export default () => {
           console.log(params, sort, filter);
           await waitTime(2000);
           return request<{
-            data: SchoolItem[];
-          }>('http://172.16.17.159:4000/api/v1/getSchools');
+            data: UserItem[];
+          }>('http://172.16.17.88:4000/api/v1/getUsers');
         }}
         editable={{
           type: 'multiple',
@@ -180,11 +243,11 @@ export default () => {
           // eslint-disable-next-line react/jsx-key
           <ModalForm
             form={form}
-            title="新建学校"
+            title="新建用户"
             trigger={
               <Button type="primary">
                 <PlusOutlined />
-                新建学校
+                新建用户
               </Button>
             }
             autoFocusFirstInput
