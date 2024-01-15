@@ -8,6 +8,9 @@ import Footer from '@/components/Footer';
 import { currentUser as queryCurrentUser } from './services/my-app';
 import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 import { message } from 'antd';
+import RootNode from '@/RootNode';
+import { createElement } from 'react';
+import type { ReactNode } from 'react';
 
 import type { RequestConfig } from 'umi';
 
@@ -24,7 +27,7 @@ export const initialStateConfig = {
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
+  currentUser?: MYAPI.CurrentUser;
   loading?: boolean;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
 }> {
@@ -68,18 +71,20 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         history.push(loginPath);
       }
     },
-    links: isDev
-      ? [
-          <Link to="/umi/plugin/openapi" target="_blank">
-            <LinkOutlined />
-            <span>OpenAPI 文档</span>
-          </Link>,
-          <Link to="/~docs">
-            <BookOutlined />
-            <span>业务组件文档</span>
-          </Link>,
-        ]
-      : [],
+    // links: isDev
+    //   ? [
+    //       <Link to="/umi/plugin/openapi" target="_blank">
+    //         <LinkOutlined />
+    //         <span>OpenAPI 文档</span>
+    //       </Link>,
+    //       <Link to="/~docs">
+    //         <BookOutlined />
+    //         <span>业务组件文档</span>
+    //       </Link>,
+    //     ]
+    //   : [],
+    // 注释掉links，重写links
+    links: [],
     menuHeaderRender: undefined,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
@@ -108,6 +113,11 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
   };
 };
 
+// 页面创建，动态渲染路由
+export function rootContainer(container: ReactNode) {
+  return createElement(RootNode, null, container);
+}
+
 /** 请求拦截 */
 const requestInterceptor = (url: any, options: any): any => {
   const headers = {
@@ -127,10 +137,11 @@ const codeMessage = {
   502: '网关错误。',
   503: '服务不可用，服务器暂时过载或维护。',
   504: '网关超时。',
+  429: '请求速率限制，请稍后重试',
 };
 
 export const request: RequestConfig = {
-  timeout: 10000,
+  timeout: 5000,
   errorConfig: {
     adaptor: (res: { statusCode: number; message: string; success: boolean; data?: object }) => {
       if (typeof res === 'object') {

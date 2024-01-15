@@ -1,4 +1,5 @@
 ﻿export default [
+  // 必有项
   {
     path: '/user',
     layout: false,
@@ -18,6 +19,7 @@
       },
     ],
   },
+  // 必有项
   {
     path: '/welcome',
     name: 'welcome',
@@ -51,22 +53,24 @@
       },
     ],
   },
-  {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
-  },
+  // {
+  //   name: 'list.table-list',
+  //   icon: 'table',
+  //   path: '/list',
+  //   component: './TableList',
+  // },
   {
     name: 'list.school-list',
     icon: 'table',
     path: '/listSchool',
     component: './SchoolList',
   },
+  // 必有项
   {
     path: '/',
     redirect: '/welcome',
   },
+  // 必有项，而且必须放在数组的最后一项
   {
     component: './404',
   },
