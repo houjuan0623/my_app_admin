@@ -10,6 +10,19 @@ declare namespace MYAPI {
     act: string[];
   };
 
+  type createResource = {
+    name: string;
+    type: string;
+    action: string[];
+  };
+
+  type updateResource = {
+    _id: string;
+    name: string;
+    type: string;
+    action: string[];
+  };
+
   type result = {
     success?: boolean;
     data?: Record<string, any>;

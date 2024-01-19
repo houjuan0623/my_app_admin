@@ -1,4 +1,9 @@
-import { createPermission } from './sysManagementApi';
+import {
+  createPermission,
+  createResource,
+  getResource,
+  updateResourceAPI,
+} from './sysManagementApi';
 import { login, currentUser } from './auth';
 
-export { createPermission, login, currentUser };
+export { createPermission, createResource, getResource, updateResourceAPI, login, currentUser };
