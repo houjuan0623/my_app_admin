@@ -131,7 +131,7 @@ export default () => {
           await waitTime(2000);
           return request<{
             data: SchoolItem[];
-          }>('http://172.16.17.159:4000/api/v1/getSchools');
+          }>('http://172.16.17.88:4000/api/v1/getSchools');
         }}
         editable={{
           type: 'multiple',

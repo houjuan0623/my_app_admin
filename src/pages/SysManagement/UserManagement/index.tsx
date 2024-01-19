@@ -44,7 +44,7 @@ export default () => {
   useEffect(() => {
     const loadRolesData = async () => {
       try {
-        const response = await request('http://172.16.17.159:4000/api/v1/getRoles');
+        const response = await request('http://172.16.17.88:4000/api/v1/getRoles');
         if (response.success && response.data) {
           const newRolesEnum = response.data.reduce((acc: RoleEnum, role: roleItem) => {
             acc[role._id] = { text: role.name };
